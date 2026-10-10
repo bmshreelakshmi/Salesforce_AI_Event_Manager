@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Event - Salesforce AI Event Manager</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            color: #172033;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: #032d60;
+            color: white;
+            padding: 25px 15px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo span {
+            color: #00a1e0;
+        }
+
+        .menu {
+            list-style: none;
+        }
+
+        .menu li {
+            padding: 14px 15px;
+            margin: 7px 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .menu li:hover,
+        .menu .active {
+            background: #0b5cab;
+        }
+
+        .main {
+            margin-left: 240px;
+            padding: 35px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .form-container {
+            max-width: 900px;
+            background: white;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .form-container h2 {
+            margin-bottom: 25px;
+            color: #032d60;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d5d9df;
+            border-radius: 7px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #0b5cab;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button {
+            border: none;
+            padding: 13px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .save-btn {
+            background: #0b5cab;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #032d60;
+        }
+
+        .cancel-btn {
+            background: #e8ebef;
+            color: #333;
+        }
+
+        #message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 7px;
+            display: none;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                width: 70px;
+            }
+
+            .logo {
+                font-size: 0;
+            }
+
+            .logo span {
+                font-size: 20px;
+            }
+
+            .menu li {
+                font-size: 0;
+                text-align: center;
+            }
+
+            .main {
+                margin-left: 70px;
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+            Salesforce <span>AI</span>
+        </div>
+
+        <ul class="menu">
+
+            <li onclick="goDashboard()">
+                🏠 Dashboard
+            </li>
+
+            <li class="active">
+                📅 Create Event
+            </li>
+
+            <li onclick="goMyEvents()">
+                📋 My Events
+            </li>
+
+            <li>
+                🤖 AI Event Agent
+            </li>
+
+            <li>
+                📊 Analytics
+            </li>
+
+            <li>
+                ⚙️ Settings
+            </li>
+
+        </ul>
+
+    </div>
+
+
+    <!-- Main -->
+
+    <div class="main">
+
+        <div class="header">
+
+            <h1>Create New Event</h1>
+
+            <p>
+                Enter the event details and let the AI Event Manager
+                help you organize it.
+            </p>
+
+        </div>
+
+
+        <div class="form-container">
+
+            <h2>📅 Event Information</h2>
+
+
+            <form id="eventForm">
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="eventName">
+                            Event Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="eventName"
+                            placeholder="Enter event name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="eventType">
+                            Event Type
+                        </label>
+
+                        <select id="eventType" required>
+
+                            <option value="">
+                                Select event type
+                            </option>
+
+                            <option value="Conference">
+                                Conference
+                            </option>
+
+                            <option value="Workshop">
+                                Workshop
+                            </option>
+
+                            <option value="Seminar">
+                                Seminar
+                            </option>
+
+                            <option value="Meeting">
+                                Meeting
+                            </option>
+
+                            <option value="Exhibition">
+                                Exhibition
+                            </option>
+
+                            <option value="Other">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="eventDate">
+                            Event Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="eventDate"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="eventTime">
+                            Event Time
+                        </label>
+
+                        <input
+                            type="time"
+                            id="eventTime"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="location">
+                        Location
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        placeholder="Enter event location"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="participants">
+                        Expected Participants
+                    </label>
+
+                    <input
+                        type="number"
+                        id="participants"
+                        placeholder="Example: 100"
+                        min="1"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="description">
+                        Event Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        placeholder="Describe the purpose and details of the event..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="buttons">
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                    >
+                        Create Event
+                    </button>
+
+                    <button
+                        type="button"
+                        class="cancel-btn"
+                        onclick="goDashboard()"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <div id="message"></div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const form = document.getElementById("eventForm");
+
+        form.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const eventData = {
+
+                name: document.getElementById("eventName").value,
+
+                type: document.getElementById("eventType").value,
+
+                date: document.getElementById("eventDate").value,
+
+                time: document.getElementById("eventTime").value,
+
+                location: document.getElementById("location").value,
+
+                participants:
+                    document.getElementById("participants").value,
+
+                description:
+                    document.getElementById("description").value
+
+            };
+
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:5000/api/events",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(eventData)
+                    }
+                );
+
+
+                const data = await response.json();
+
+                const message =
+                    document.getElementById("message");
+
+                message.style.display = "block";
+
+
+                if (response.ok) {
+
+                    message.className = "success";
+
+                    message.innerText =
+                        "✅ Event created successfully!";
+
+                    form.reset();
+
+                } else {
+
+                    message.className = "error";
+
+                    message.innerText =
+                        "❌ " + (data.message || "Failed to create event.");
+
+                }
+
+            } catch (error) {
+
+                const message =
+                    document.getElementById("message");
+
+                message.style.display = "block";
+
+                message.className = "error";
+
+                message.innerText =
+                    "❌ Backend connection failed. Make sure Flask is running.";
+
+            }
+
+        });
+
+
+        function goDashboard() {
+
+            window.location.href = "index.html";
+
+        }
+
+
+        function goMyEvents() {
+
+            alert("My Events page will be created next.");
+
+        }
+
+    </script>
+
+</body>
+
+</html>

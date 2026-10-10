@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Event Agent | Salesforce AI Event Manager</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: #0b5cab;
+            color: white;
+            padding: 25px 15px;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: bold;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 14px 15px;
+            margin: 7px 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sidebar li:hover,
+        .sidebar .active {
+            background: rgba(255,255,255,0.18);
+        }
+
+        .main {
+            margin-left: 240px;
+            padding: 35px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            color: #16325c;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .card h2 {
+            color: #16325c;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 7px;
+            color: #334155;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #0b5cab;
+        }
+
+        .button-area {
+            margin-top: 22px;
+        }
+
+        button {
+            border: none;
+            padding: 13px 24px;
+            border-radius: 7px;
+            background: #0b5cab;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #084b8a;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 18px;
+            color: #0b5cab;
+            font-weight: bold;
+        }
+
+        .result {
+            display: none;
+        }
+
+        .result-box {
+            background: #f8fafc;
+            border-left: 4px solid #0b5cab;
+            padding: 18px;
+            margin-bottom: 18px;
+            border-radius: 6px;
+        }
+
+        .result-box h3 {
+            color: #16325c;
+            margin-bottom: 12px;
+        }
+
+        .result-box ul {
+            padding-left: 22px;
+        }
+
+        .result-box li {
+            margin-bottom: 9px;
+        }
+
+        .error {
+            color: #dc2626;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 800px) {
+            .sidebar {
+                width: 190px;
+            }
+
+            .main {
+                margin-left: 190px;
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+
+        <div class="logo">
+            ⚡ Salesforce AI
+        </div>
+
+        <ul>
+            <li onclick="goDashboard()">🏠 Dashboard</li>
+            <li onclick="createEvent()">📅 Create Event</li>
+            <li onclick="myEvents()">📋 My Events</li>
+            <li class="active">🤖 AI Event Agent</li>
+            <li>📊 Analytics</li>
+            <li>⚙️ Settings</li>
+        </ul>
+
+    </div>
+
+
+    <div class="main">
+
+        <div class="header">
+            <h1>🤖 AI Event Agent</h1>
+            <p>
+                Generate an intelligent event plan, tasks and schedule.
+            </p>
+        </div>
+
+
+        <div class="card">
+
+            <h2>Generate Event Plan</h2>
+
+            <form id="aiForm">
+
+                <div class="form-grid">
+
+                    <div class="field">
+                        <label>Event Name</label>
+                        <input
+                            type="text"
+                            id="eventName"
+                            placeholder="Enter event name"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Event Type</label>
+
+                        <select id="eventType" required>
+                            <option value="">Select event type</option>
+                            <option>Conference</option>
+                            <option>Workshop</option>
+                            <option>Seminar</option>
+                            <option>Meeting</option>
+                            <option>Exhibition</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Expected Participants</label>
+
+                        <input
+                            type="number"
+                            id="participants"
+                            placeholder="Example: 100"
+                            min="1"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Event Date</label>
+
+                        <input
+                            type="date"
+                            id="eventDate"
+                            required
+                        >
+                    </div>
+
+                    <div class="field full">
+                        <label>Event Description</label>
+
+                        <textarea
+                            id="description"
+                            placeholder="Describe your event..."
+                        ></textarea>
+                    </div>
+
+                </div>
+
+                <div class="button-area">
+                    <button type="submit">
+                        ✨ Generate AI Event Plan
+                    </button>
+                </div>
+
+            </form>
+
+            <div class="loading" id="loading">
+                🤖 AI Event Agent is preparing your event plan...
+            </div>
+
+            <div class="error" id="error"></div>
+
+        </div>
+
+
+        <div class="card result" id="result">
+
+            <h2>✨ AI Generated Event Plan</h2>
+
+            <div class="result-box">
+                <h3>📌 Event Summary</h3>
+                <p id="summary"></p>
+            </div>
+
+            <div class="result-box">
+                <h3>✅ Suggested Tasks</h3>
+                <ul id="tasks"></ul>
+            </div>
+
+            <div class="result-box">
+                <h3>🗓️ Preparation Timeline</h3>
+                <ul id="schedule"></ul>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const form = document.getElementById("aiForm");
+
+        form.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const loading = document.getElementById("loading");
+            const error = document.getElementById("error");
+            const result = document.getElementById("result");
+
+            loading.style.display = "block";
+            error.innerText = "";
+            result.style.display = "none";
+
+            const eventData = {
+
+                name: document.getElementById("eventName").value,
+
+                type: document.getElementById("eventType").value,
+
+                participants:
+                    document.getElementById("participants").value,
+
+                date:
+                    document.getElementById("eventDate").value,
+
+                description:
+                    document.getElementById("description").value
+            };
+
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:5000/api/ai-event-plan",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(eventData)
+                    }
+                );
+
+
+                const data = await response.json();
+
+                loading.style.display = "none";
+
+
+                if (!response.ok) {
+
+                    error.innerText =
+                        "❌ " +
+                        (data.message || "Failed to generate plan.");
+
+                    return;
+                }
+
+
+                document.getElementById("summary").innerText =
+                    data.summary;
+
+
+                const tasksList =
+                    document.getElementById("tasks");
+
+                tasksList.innerHTML = "";
+
+                data.tasks.forEach(function(task) {
+
+                    const li = document.createElement("li");
+
+                    li.innerText = task;
+
+                    tasksList.appendChild(li);
+
+                });
+
+
+                const scheduleList =
+                    document.getElementById("schedule");
+
+                scheduleList.innerHTML = "";
+
+                data.schedule.forEach(function(item) {
+
+                    const li = document.createElement("li");
+
+                    li.innerText = item;
+
+                    scheduleList.appendChild(li);
+
+                });
+
+
+                result.style.display = "block";
+
+            } catch (err) {
+
+                loading.style.display = "none";
+
+                error.innerText =
+                    "❌ Backend connection failed. Make sure Flask is running.";
+
+            }
+
+        });
+
+
+        function goDashboard() {
+            window.location.href = "index.html";
+        }
+
+
+        function createEvent() {
+            window.location.href = "create-event.html";
+        }
+
+
+        function myEvents() {
+            window.location.href = "my-events.html";
+        }
+
+    </script>
+
+</body>
+</html>

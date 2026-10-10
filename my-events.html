@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Events - Salesforce AI Event Manager</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            color: #172033;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: #032d60;
+            color: white;
+            padding: 25px 15px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .logo span {
+            color: #00a1e0;
+        }
+
+        .menu {
+            list-style: none;
+        }
+
+        .menu li {
+            padding: 14px 15px;
+            margin: 7px 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .menu li:hover,
+        .menu .active {
+            background: #0b5cab;
+        }
+
+        .main {
+            margin-left: 240px;
+            padding: 35px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .create-btn {
+            background: #0b5cab;
+            color: white;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .create-btn:hover {
+            background: #032d60;
+        }
+
+        .events-container {
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .event-card {
+            border: 1px solid #e1e5ea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .event-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .event-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .event-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #032d60;
+        }
+
+        .status {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .event-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .description {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #777;
+        }
+
+        .empty-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                width: 70px;
+            }
+
+            .logo {
+                font-size: 0;
+            }
+
+            .logo span {
+                font-size: 20px;
+            }
+
+            .menu li {
+                font-size: 0;
+                text-align: center;
+            }
+
+            .main {
+                margin-left: 70px;
+                padding: 20px;
+            }
+
+            .header {
+                display: block;
+            }
+
+            .create-btn {
+                margin-top: 15px;
+            }
+
+            .event-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+            Salesforce <span>AI</span>
+        </div>
+
+        <ul class="menu">
+
+            <li onclick="goDashboard()">
+                🏠 Dashboard
+            </li>
+
+            <li onclick="createEvent()">
+                📅 Create Event
+            </li>
+
+            <li class="active">
+                📋 My Events
+            </li>
+
+            <li>
+                🤖 AI Event Agent
+            </li>
+
+            <li>
+                📊 Analytics
+            </li>
+
+            <li>
+                ⚙️ Settings
+            </li>
+
+        </ul>
+
+    </div>
+
+
+    <!-- Main -->
+
+    <div class="main">
+
+        <div class="header">
+
+            <div>
+
+                <h1>My Events</h1>
+
+                <p>
+                    View and manage all your created events.
+                </p>
+
+            </div>
+
+            <button
+                class="create-btn"
+                onclick="createEvent()"
+            >
+                + Create Event
+            </button>
+
+        </div>
+
+
+        <div class="events-container">
+
+            <div id="eventsList">
+
+                <div class="loading">
+                    Loading events...
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        async function loadEvents() {
+
+            const eventsList =
+                document.getElementById("eventsList");
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:5000/api/events"
+                );
+
+                const data = await response.json();
+
+                const events = data.events || [];
+
+
+                if (events.length === 0) {
+
+                    eventsList.innerHTML = `
+                        <div class="empty">
+                            <div class="empty-icon">📅</div>
+                            <h2>No Events Yet</h2>
+                            <p>Create your first event to get started.</p>
+                        </div>
+                    `;
+
+                    return;
+                }
+
+
+                eventsList.innerHTML = "";
+
+
+                events.forEach(function(event) {
+
+                    const card =
+                        document.createElement("div");
+
+                    card.className = "event-card";
+
+                    card.innerHTML = `
+
+                        <div class="event-top">
+
+                            <div class="event-name">
+                                ${event.name || "Unnamed Event"}
+                            </div>
+
+                            <div class="status">
+                                Created
+                            </div>
+
+                        </div>
+
+                        <div class="event-info">
+
+                            <div>
+                                📌 <strong>Type:</strong>
+                                ${event.type || "-"}
+                            </div>
+
+                            <div>
+                                📅 <strong>Date:</strong>
+                                ${event.date || "-"}
+                            </div>
+
+                            <div>
+                                🕐 <strong>Time:</strong>
+                                ${event.time || "-"}
+                            </div>
+
+                            <div>
+                                📍 <strong>Location:</strong>
+                                ${event.location || "-"}
+                            </div>
+
+                            <div>
+                                👥 <strong>Participants:</strong>
+                                ${event.participants || "-"}
+                            </div>
+
+                        </div>
+
+                        <div class="description">
+
+                            <strong>Description:</strong><br>
+
+                            ${event.description || "No description provided."}
+
+                        </div>
+                    `;
+
+                    eventsList.appendChild(card);
+
+                });
+
+            } catch (error) {
+
+                eventsList.innerHTML = `
+                    <div class="error">
+                        ❌ Unable to connect to the backend.
+                        Make sure Flask server is running.
+                    </div>
+                `;
+
+            }
+
+        }
+
+
+        function goDashboard() {
+
+            window.location.href = "index.html";
+
+        }
+
+
+        function createEvent() {
+
+            window.location.href = "create-event.html";
+
+        }
+
+
+        loadEvents();
+
+    </script>
+
+</body>
+
+</html>
